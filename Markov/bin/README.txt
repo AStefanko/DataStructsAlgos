@@ -1,0 +1,146 @@
+NetID: ams144
+Name: Alexa Stefanko
+Hours Spent: Between 12-17. I lost track. And a lot of that was staring at the code unsure of what to do.
+Consulted With: 
+I had help from three TAs, and one classmate, and StackOverflow. 
+Patrick Terry helped me fix an Index Out of Bound error for MapMarkovModel and rearrange where 
+I was building my Character Arraylist. 
+Athenais Lapeyre (I think, it was Monday night at 7, but I forgott to ask her name) helped me 
+with WordMarkovModel, which was returning a list of hashCodes and class names. 
+Basically, I had been printing my map. Sarah, a classmate whose last name I don’t know, 
+helped me figure out that I was printing my map instead of what I was trying to. 
+She advised me to use the wordAt function that I wrote. 
+Finally, my recitation TA, Efe Aras, also looked over my code when it was printing the 
+map contents and told me to look over my toString function. 
+Resources Used: Also, I asked two or three questions on Piazza. 
+I used StackOverflow to look at how to access keys from the map. 
+Impressions: 
+The writeup for this assignment was really confusing. 
+The assignment itself is not that confusing. 
+The write up made it sound like you had to use a String array, but the Sunday night TA told us 
+that a Character array was absolutely the way to go. 
+The use and implementation of WordNgram was confusing as well. 
+I was unsure of how those were to be implemented. 
+Overall, I liked the cotnent of this assignment. I just found the write up rather frustrating. 
+
+ANALYSIS
+
+Part A
+
+1)
+	a) alice.txt, k = 1, 200 characters max
+		Read 152143 chars in .202 seconds
+		Generated 200 chars in .108 seconds
+b) alice.txt, k = 1, 400 characters max
+	Generated 400 chars in .131 seconds
+c)alice.txt, k = 1, 800 characters max:
+	Generated 800 chars in  .243 seconds
+d)alice.txt, k = 5, 200 characters max:
+	Generated 200 chars in .042 seconds
+e) alice.txt, k = 5, 400 characters max:
+	Generated 400 chars in .088 seconds
+f) alice.txt, k = 5, 800 characters max:
+	Generated 800 chars in .19 seconds
+g) alice.txt, k = 10, 200 characters max:
+	Generated 200 chars in .042 seconds
+h) alice.txt, k = 10, 400 characters max:
+	Generated 400 chars in .087 seconds
+i) alice.txt, k = 10, 800 characters max:
+	generated 800 chars in .182 seconds
+j) hawthorne.txt, k = 1, 200 characters max:
+	Read 496768  chars in .154 seconds
+	Generated 200 chars in .253 seconds
+k) hawthorne.txt, k = 1, 400 characters max:
+	Generated 400 chars in .463 seconds
+l) hawthorne.txt, k = 1, 800 characters max:
+	generated 800 chars in .958seconds 
+
+I got inconsistent results concerning the length of the training text. 
+If I opened the window and ran the files without generating characters one after another in 
+succession, the runtime for just reading the files got progressively smaller. 
+I am not sure why this would be.
+This changed when you switch from the alice to the hawthorne trials. 
+Hawthorne is longer, and it took longer to generate characters given the same parameters as alice.  Overall, changing the k values didn’t seem to make a significant difference. 
+However, changing the max number of characters caused it to take much longer.  
+In summary, longer texts mean longer times spent generating characters. 
+And larger max numbers of characters causes it to take longer. 
+But k values do not make a huge difference. 
+Regarding Shakespeare: it would take a good long while for that to happen. 
+Hawthorne has roughly 3 times the number of characters that Alice had, 
+and it took about three times longer to run the same trial. 
+With Hawthorne, going from 400 to 800 characters roughly caused the time to double. 
+Shakespeare has about 11 times more characters than Hawthorne. 
+So if you multiple Hawthorne’s time for 800 characters by 11, and then double it, you get about 22 seconds. 
+So I assume it would take about 22 seconds to read Shakespeare' s stuff.
+
+2) 
+a)alice.txt, k = 5, 200 characters max:
+	Generated 200 chars in .765 seconds
+b) alice.txt, k = 5, 400 characters max:
+	Generated 400 chars in .515 seconds
+c) alice.txt, k = 5, 800 characters max:
+	Generated 800 chars in .414 seconds
+d) alice.txt, k=5, 1600 chars 
+	generated 1600 chars in .419 seconds 
+
+The first trial took the longest, presumably because taking the map required a fair amount of time.
+ After that, however, the time to generate text was relatively constant, or diminished slightly. 
+ It did not need to keep creating the text, so the different numbers of characters did not make a 
+ significant difference.  
+
+3) First, I tested this using the hashCode function that returned 15, which we agreed was a 
+terrible function because the point of a HashCode function is uniqueness.  
+Using Hawthorne, k=2, and a max of 150, it took .248 seconds . 
+For 2 and 200, it took .196 seconds. 
+ 
+	Then I tried using the method in the quiz that doesn’t work terribly well. 
+public int hashCode() {
+		int sum=0;
+		for(int k=0; k<myWords.length; k++) {
+			sum +=myWords[k].hashCode();
+		}
+		return sum; 
+	}
+	
+ The same Hawthorne, k=2, max=150 trial took .102 seconds. With 200 characters, it took .534 seconds. 
+	For the hashCode that I ended up actually using, Hawthorne with k=2 and a max of 150 only took .083 seconds. 
+	With a max of 200 chars, it took .035 seconds. 
+
+4) I ran this trial quite a few times, the results are as followed:
+7917, 1254, 1666, 1063, 5064, 7912, 14541, 12045, 8352, 4532, 6465
+If you take the average of these things, you get about 7,422 characters. 
+
+
+
+
+Part B
+	HashMap	TreeMap
+100	0.077	0.177
+200	0.047	0.165
+300	0.023	0.138
+400	0.024	0.149
+500	0.042	0.141
+600	0.051	0.161
+700	0.026	0.17
+800	0.042	0.139
+900	0.028	0.178
+1000	0.027	0.137
+1100	0.048	0.243
+1200	0.032	0.139
+1300	0.028	0.147
+1400	0.027	0.128
+1500	0.031	0.139
+1600	0.034	0.14
+
+		
+ 
+
+I don’t really see the two lines diverge. 
+TreeMap hovers above hashMap for the whole graph.
+However, TreeMap clearly takes more time than HashMap in every situation. 
+Sorting takes extra time, and TreeMaps are sorted. 
+Therefore, it makes sense that using TreeMap would take longer. 
+HashMaps don’t have to deal with the pain of being sorted. 
+I do not think that TreeMaps provide an advantage in this situation. 
+If anything, it might decrease the randomness of picking the next word, 
+which I thought was what we are trying to avoid. 
