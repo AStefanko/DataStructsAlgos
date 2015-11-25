@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 
 /**
@@ -54,15 +55,15 @@ public class BinarySearchAutocomplete implements Autocompletor {
 	 * @return The first index i for which comparator considers a[i] and key
 	 * as being equal. If no such index exists, return -1 instead.
 	 */
-	public static int lowest(Term[] a, Term key) {
-		for(int i=0; i<a.length; i++) {
-			if(a[i]==key) {
-				myLowest=i;
-				break;
-			}
-		}
-		return myLowest;
-	}
+//	public static int lowest(Term[] a, Term key) {
+//		for(int i=0; i<a.length; i++) {
+//			if(a[i]==key) {
+//				myLowest=i;
+//				break;
+//			}
+//		}
+//		return myLowest;
+//	}
 	//why is mylowest null? 
 	public static int firstIndexOf(Term[] a, Term key, Comparator<Term> comparator) {
 		//TODO: Implement firstIndexOf
@@ -70,26 +71,30 @@ public class BinarySearchAutocomplete implements Autocompletor {
 			throw new IllegalArgumentException();
 		}
 		int low=-1;
-		//System.out.println("myLowest: " + myLowest);
-		System.out.println("low: " + low);
 		int high=a.length-1;
-		System.out.println("high: "+ high);
+		//System.out.println("high: "+ high);
 		if(comparator.compare(key, a[0])==0){
 			return 0;
 		}
 		while(high-low>1){
 			int mid = (low+high)/2;
-			System.out.println("mid: " + mid);
-			if(comparator.compare(key, a[mid])==0) { //&& comparator.compare(a[mid-1], a[mid])==0){
-				high=mid;
-			}else if(comparator.compare(key, a[mid])>0) {
+			//System.out.println("mid: " + mid);
+			if(comparator.compare(key, a[mid])>0) {
 				low=mid;
 			} else if (comparator.compare(key, a[mid])<0) {
 				high=mid;
+			} else {
+				high=mid;
 			}
 		}
-		if(comparator.compare(key, a[low])==0) {
-			return low;
+//		if(comparator.compare(a[low], key)==0) {
+//			return low;
+//		}
+//		if(comparator.compare(a[high], key)==0) {
+//			return high;
+//		}
+		if(high>=0 && high<a.length && comparator.compare(key, a[high])==0){
+			return high;
 		}
 		return -1;
 		
@@ -105,15 +110,15 @@ public class BinarySearchAutocomplete implements Autocompletor {
 	 * @return The last index i for which comparator considers a[i] and key
 	 * as being equal. If no such index exists, return -1 instead.
 	 */
-	public static void highest(Term[] a, Term key) {
-		for(int i=a.length-1; i>0; i--) {
-			if(a[i]==key) {
-				myHighest=i;
-				System.out.println("myHighest: " + myHighest);
-				break;
-			}
-		}
-	}
+//	public static void highest(Term[] a, Term key) {
+//		for(int i=a.length-1; i>0; i--) {
+//			if(a[i]==key) {
+//				myHighest=i;
+//				System.out.println("myHighest: " + myHighest);
+//				break;
+//			}
+//		}
+//	}
 	public static int lastIndexOf(Term[] a, Term key, Comparator<Term> comparator) {
 		//TODO: Implement lastIndexOf	
 		if(a==null || key==null || comparator==null){
@@ -126,16 +131,16 @@ public class BinarySearchAutocomplete implements Autocompletor {
 		}
 		while(high-low>1){
 			int mid = (low+high)/2;
-			if(comparator.compare(key, a[mid])==0){ //&& comparator.compare(a[mid+1], a[mid])==0){
-				low=mid;
-			}else if(comparator.compare(key, a[mid])>0) {
+			if(comparator.compare(key, a[mid])>0) {
 				low=mid;
 			} else if (comparator.compare(key, a[mid])<0) {
 				high=mid;
+			} else {
+				low=mid;
 			}
 		}
-		if(comparator.compare(key, a[high])==0) {
-			return high;
+		if(low>=0 && low<a.length && comparator.compare(key, a[low])==0) {
+			return low;
 		}
 		return -1;
 	}
@@ -164,19 +169,31 @@ public class BinarySearchAutocomplete implements Autocompletor {
 		if(prefix==null) {
 			throw new NullPointerException();
 		}
-		String[] fin= new String[k];
+		int inn=0;
+		
 		Term preef = new Term(prefix, 0);
-		//Comparator<Term> comp = new Term.PrefixOrder(k);
-		int start=BinarySearchAutocomplete.firstIndexOf(myTerms, preef, new Term.PrefixOrder(k));
-		int end=BinarySearchAutocomplete.lastIndexOf(myTerms, preef, new Term.PrefixOrder(k));
-		System.out.println("start: "+ start);
-		System.out.println("end: "+ end);
+		int start=firstIndexOf(myTerms, preef, new Term.PrefixOrder(prefix.length()));
+		int end=lastIndexOf(myTerms, preef, new Term.PrefixOrder(prefix.length()));
+		//System.out.println("start: "+ start);
+		//System.out.println("end: "+ end);
+		ArrayList<Term> lst=new ArrayList<Term>();
 		if(start==-1 || end==-1) {
-			return fin;
+			return new String[0];
 		}
-		Arrays.sort(myTerms, new Term.ReverseWeightOrder()); 
+		
 		for(int i=start; i<=end; i++) {
-			fin[i]=myTerms[i].toString();
+			lst.add(myTerms[i]);
+		}
+		
+		Collections.sort(lst, new Term.ReverseWeightOrder()); 
+		if(k>lst.size()) {
+			inn=lst.size();
+		} else{
+			inn=k;
+		}
+		String[] fin= new String[inn];
+		for(int i=0; i<inn; i++) {
+			fin[i]=lst.get(i).getWord();
 		}
 		return fin;
 		
@@ -205,8 +222,7 @@ public class BinarySearchAutocomplete implements Autocompletor {
 		String top = "";
 		int start=BinarySearchAutocomplete.firstIndexOf(myTerms, preef, new Term.PrefixOrder(prefix.length()));
 		int end=BinarySearchAutocomplete.lastIndexOf(myTerms, preef, new Term.PrefixOrder(prefix.length()));
-		System.out.println("start: "+ start);
-		System.out.println("end: "+ end);
+
 		if(start==-1 || end==-1) {
 			return "";
 		}
@@ -214,7 +230,7 @@ public class BinarySearchAutocomplete implements Autocompletor {
 		int idx=0;
 		ArrayList<Term> lst = new ArrayList<Term>();
 		for(int i=start; i<=end; i++) {
-			fin[i]=myTerms[i].toString();
+			lst.add(myTerms[i]);
 		}
 		for(int i=0; i<lst.size(); i++) {
 			double w = lst.get(i).getWeight();

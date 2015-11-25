@@ -1,10 +1,11 @@
 import java.util.ArrayList;
+
 import java.util.Collections;
-import java.util.HashMap;
+//import java.util.HashMap;
 import java.util.PriorityQueue;
 
-import packag.Node;
-import packag.each;
+//import packag.Node;
+//import packag.each;
 
 /**
  * General trie/priority queue algorithm for implementing Autocompletor
@@ -22,7 +23,7 @@ public class TrieAutocomplete implements Autocompletor {
 	 * Root of entire trie
 	 */
 	protected Node myRoot;
-	private HashMap<String, Double> intree;
+	//private HashMap<String, Double> intree;
 
 	/**
 	 * Constructor method for TrieAutocomplete. Should initialize the trie
@@ -65,6 +66,7 @@ public class TrieAutocomplete implements Autocompletor {
 	 *             IllegalArgumentException if weight is negative.
 	 * 
 	 */
+	
 	private void add(String word, double weight) {
 		// TODO: Implement add
 		if(word==null) {
@@ -73,44 +75,55 @@ public class TrieAutocomplete implements Autocompletor {
 		if(weight<0) {
 			throw new java.lang.IllegalArgumentException();
 		}
-		//if weights is zero, then make the weight the weight 
-		//and the subtree weight the weight 
-		//if you're adding a bigger word, then follow and change all the pointers
-		double max=0.0;
+
 		Node curr = myRoot;
-		for(int i=0; i<word.length(); i++) {
-			Node babay=curr.children.get(word.charAt(i));
+		char[] cc = word.toCharArray();
+		for(char ch : cc) {
 			if(curr.mySubtreeMaxWeight<weight) {
 				curr.mySubtreeMaxWeight=weight;
+				//System.out.println(weight);
 			}
-			if(babay==null || !curr.containsKey(word.charAt(i))); {
-				curr.children.put(word.charAt(i), new Node(word.charAt(i), curr, weight));
+
+			if(!curr.children.containsKey(ch)) {
+				curr.children.put(ch, new Node(ch, curr, weight));
+				//System.out.println("ch: " + ch);
 			}
-			if(babay.myWeight>max) {
-				max=babay.myWeight;
-			}
-			
-			curr=curr.children.get(word.charAt(i));
-			
+			//System.out.println("curr.tostring: "+curr.toString());
+			curr=curr.children.get(ch);
+			//System.out.println("Add");
+
 		}
 		
-		if(intree.containsKey(word)) {
-			if(intree.get(word) > weight) {
-				for(int i=0; i<word.length(); i++) {
-					if(curr.mySubtreeMaxWeight>weight) {
-						curr.mySubtreeMaxWeight=weight+max;
-					}
-					curr=curr.parent;
-				}
-			}
-		}
-		intree.put(word, weight);
+
 		curr.isWord=true;
-		curr.myWeight=weight;
-		curr.myWord=word;
+		curr.setWeight(weight);
+		curr.setWord(word);		
+		curr.mySubtreeMaxWeight=weight;
+
+		
+		//System.out.println("curr.tostring: " + curr.toString());
 		if(curr.mySubtreeMaxWeight<weight) {
 			curr.mySubtreeMaxWeight=weight;
+			//System.out.println("IFFFFF");
 		}
+		
+		if(curr.mySubtreeMaxWeight>weight) {
+			while(curr!=null) {
+				curr=curr.parent;
+				double maxS=curr.myWeight;
+				//System.out.println("IN PARENT THING");
+				for(Node babay: curr.children.values()) {
+					if(babay.mySubtreeMaxWeight>maxS) {
+						maxS=babay.mySubtreeMaxWeight;
+					}
+				}
+				//System.out.println("last");
+				
+				curr.mySubtreeMaxWeight=maxS;
+				
+			}
+		}
+		
 	}
 
 	@Override
@@ -136,30 +149,51 @@ public class TrieAutocomplete implements Autocompletor {
 	 */
 	public String[] topKMatches(String prefix, int k) {
 		// TODO: Implement topKMatches
-		PriorityQueue<Node> pq = new PriorityQueue<Node>();; //whatdo i do here? How do i initialize the node?
-		ArrayList <String> lst = new ArrayList<String>();
-		Node curr=myRoot;
-		for(int i=0; i<prefix.length(); i++) {
-			Node babay=curr.children.get(prefix.charAt(i));
-			curr=babay;
+		if(prefix==null) {
+			throw new NullPointerException();
 		}
+		Node curr=myRoot;
+		
+		for(char ch: prefix.toCharArray()){
+			if(!curr.children.containsKey(ch)) {
+				return new String[0];
+			}
+			curr=curr.children.get(ch);
+		}
+		if(k==0) {
+			return new String[0];
+		}
+		
+		PriorityQueue<Node> pq = new PriorityQueue<Node>(new Node.ReverseSubtreeMaxWeightComparator()); //whatdo i do here? How do i initialize the node?
+		ArrayList <Node> lst = new ArrayList<Node>();
 		pq.add(curr);
-		while(pq!=null || lst.size()<k) {
+		while(!pq.isEmpty() || (lst.size()>0 && curr.myWeight>lst.get(lst.size()-1).myWeight)) {
+			//if(!lst.isEmpty() && curr.myWeight<Math.min(a, b))
 			curr=pq.poll();
 			if(curr.isWord) {
-				lst.add(curr.myWord);
+				lst.add(curr);
 			}
-			for(each cild of curr) {
-				pq.push(curr);
+			//System.out.println("While loop in topKMatches");
+			//if(!lst.isEmpty() && curr.myWeight<Math.min(a, b))
+			for(Node babay: curr.children.values()) {
+				pq.add(babay);
+			//loop through children
+				//add them to queue
 			}
 		}
-		Collections.sort(lst);
-		String[] finna = new String[k];
-		for(int i=0; i<k; i++) {
-			finna[i]=lst.get(i);
+		Collections.sort(lst, Collections.reverseOrder()); 
+		int inn=0;
+		if(k>lst.size()) {
+			inn=lst.size();
+		} else{
+			inn=k;
 		}
-		return finna;
-		
+		String[] fin= new String[inn];
+		for(int i=0; i<inn; i++) {
+			fin[i]=lst.get(i).getWord();
+		}
+		return fin;
+
 	}
 
 	@Override
@@ -177,17 +211,36 @@ public class TrieAutocomplete implements Autocompletor {
 	 */
 	public String topMatch(String prefix) {
 		// TODO: Implement topMatch
+		if(prefix==null) {
+			throw new NullPointerException();
+		}
 		Node curr = myRoot;
+		for(Character key: prefix.toCharArray()) {
+			if(!curr.children.containsKey(key)){
+				return "";
+			}
+			curr=curr.children.get(key);
+		}
+		
 		while(curr.mySubtreeMaxWeight!=curr.myWeight) {
-			for(int i=0; i<prefix.length(); i++) {
-				if(curr.children.get(prefix.charAt(i)).mySubtreeMaxWeight==curr.mySubtreeMaxWeight) {
-					curr=curr.children.get(prefix.charAt(i));
+
+		//	System.out.println(curr.mySubtreeMaxWeight);
+		//	System.out.println(curr.myWeight);
+			
+		//	System.out.println(curr.children.values().size());
+			
+			for(Node babay: curr.children.values()) {
+			//	System.out.println(babay.mySubtreeMaxWeight);
+				if(curr.mySubtreeMaxWeight==babay.mySubtreeMaxWeight){
+					curr=babay;
 					break;
 				}
 			}
 		}
-		return curr.myWord;
-	}
+		
+		//System.out.println("curr.getWord in topmatch: " + curr.getWord());
+
+		return curr.getWord(); 
 	}
 
 }
